@@ -1,21 +1,19 @@
 body {
   text-align: center;
-  background-color: green;
 }
 
 button {
   padding: 15px;
-  background-color: black;
+  background-color: red;
   color: white;
   border-radius: 8px;
   border: none;
-  display: none;
   margin: 0 auto;
 }
 
 button:hover {
   cursor: pointer;
-  background-color: #444;
+  background-color: darkred;
 }
 
 button:active,
@@ -23,13 +21,20 @@ button:focus {
   outline: none;
 }
 
-#card-area {
-  margin-top: 80px;
+#pokemon-area {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
 }
 
-#card-area > img {
-  position: absolute;
-  left: 0;
-  right: 0;
-  margin: auto;
+.card {
+  width: 250px;
+  background-color: lightsteelblue;
+  border: 8px solid steelblue;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.card p {
+  font-family: sans-serif;
 }

@@ -1,54 +1,89 @@
-$(function () {
-  let baseURL = "https://deckofcardsapi.com/api/deck";
+$(function() {
+  let baseURL = "https://pokeapi.co/api/v2";
 
   // 1.
-  $.getJSON(`${baseURL}/new/draw/`).then((data) => {
-    let { suit, value } = data.cards[0];
-    console.log(`${value.toLowerCase()} of ${suit.toLowerCase()}`);
+  $.getJSON(`${baseURL}/pokemon/?limit=1000`, function(data) {
+    console.log(data);
   });
 
   // 2.
-  let firstCard = null;
-  $.getJSON(`${baseURL}/new/draw/`)
-    .then((data) => {
-      firstCard = data.cards[0];
-      let deckId = data.deck_id;
-      return $.getJSON(`${baseURL}/${deckId}/draw/`);
-    })
-    .then((data) => {
-      let secondCard = data.cards[0];
-      [firstCard, secondCard].forEach(function (card) {
-        console.log(
-          `${card.value.toLowerCase()} of ${card.suit.toLowerCase()}`
-        );
+  $.getJSON(`${baseURL}/pokemon/?limit=1000`, function(data) {
+    let randomPokemonUrls = [];
+    for (let i = 0; i < 3; i++) {
+      let randomIdx = Math.floor(Math.random() * data.results.length);
+      let url = data.results.splice(randomIdx, 1)[0].url;
+      randomPokemonUrls.push(url);
+    }
+    randomPokemonUrls.forEach(function(url) {
+      $.getJSON(url, function(data) {
+        console.log(data);
       });
     });
+  });
 
   // 3.
-  let deckId = null;
-  let $btn = $("button");
-  let $cardArea = $("#card-area");
-
-  $.getJSON(`${baseURL}/new/shuffle/`).then((data) => {
-    deckId = data.deck_id;
-    $btn.show();
-  });
-
-  $btn.on("click", function () {
-    $.getJSON(`${baseURL}/${deckId}/draw/`).then((data) => {
-      let cardSrc = data.cards[0].image;
-      let angle = Math.random() * 90 - 45;
-      let randomX = Math.random() * 40 - 20;
-      let randomY = Math.random() * 40 - 20;
-      $cardArea.append(
-        $("<img>", {
-          src: cardSrc,
-          css: {
-            transform: `translate(${randomX}px, ${randomY}px) rotate(${angle}deg)`,
-          },
-        })
-      );
-      if (data.remaining === 0) $btn.remove();
+  $.getJSON(`${baseURL}/pokemon/?limit=1000`, function(data) {
+    let randomPokemonUrls = [];
+    for (let i = 0; i < 3; i++) {
+      let randomIdx = Math.floor(Math.random() * data.results.length);
+      let url = data.results.splice(randomIdx, 1)[0].url;
+      randomPokemonUrls.push(url);
+    }
+    randomPokemonUrls.forEach(function(url) {
+      $.getJSON(url, function(data) {
+        let name = data.name;
+        $.getJSON(data.species.url, function(data) {
+          let descriptionObj = data.flavor_text_entries.find(
+            entry => entry.language.name === "en"
+          );
+          let description = descriptionObj
+            ? descriptionObj.flavor_text
+            : "No description available.";
+          console.log(`${name}: ${description}`);
+        });
+      });
     });
   });
+
+  // 4.
+
+  let $btn = $("button");
+  let $pokeArea = $("#pokemon-area");
+
+  $btn.on("click", function() {
+    $pokeArea.empty();
+    $.getJSON(`${baseURL}/pokemon/?limit=1000`, function(data) {
+      let randomPokemonUrls = [];
+      for (let i = 0; i < 3; i++) {
+        let randomIdx = Math.floor(Math.random() * data.results.length);
+        let url = data.results.splice(randomIdx, 1)[0].url;
+        randomPokemonUrls.push(url);
+      }
+      randomPokemonUrls.forEach(function(url, i) {
+        $.getJSON(url, function(data) {
+          let name = data.name;
+          let imgSrc = data.sprites.front_default;
+          $.getJSON(data.species.url, function(data) {
+            let descriptionObj = data.flavor_text_entries.find(
+              entry => entry.language.name === "en"
+            );
+            let description = descriptionObj
+              ? descriptionObj.flavor_text
+              : "No description available.";
+            $pokeArea.append(makePokeCard(name, imgSrc, description));
+          });
+        });
+      });
+    });
+  });
+
+  function makePokeCard(name, imgSrc, description) {
+    return `
+      <div class="card">
+        <h1>${name}</h1>
+        <img src=${imgSrc} />
+        <p>${description}</p>
+      </div>
+    `;
+  }
 });
